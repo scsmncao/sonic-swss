@@ -3,6 +3,7 @@
 #include "logger.h"
 
 extern sai_tunnel_api_t* sai_tunnel_api;
+extern sai_router_interface_api_t* sai_router_intfs_api;
 
 extern sai_object_id_t gVirtualRouterId;
 extern sai_object_id_t overlayIfId;
