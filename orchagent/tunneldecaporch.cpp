@@ -162,6 +162,8 @@ bool TunnelDecapOrch::addDecapTunnel(string key, string type, IpAddresses dst_ip
 
     SWSS_LOG_ENTER();
 
+    sai_status_t status;
+
     // adding tunnel attributes to array and writing to ASIC_DB
     sai_attribute_t attr;
     vector<sai_attribute_t> tunnel_attrs;
@@ -233,7 +235,7 @@ bool TunnelDecapOrch::addDecapTunnel(string key, string type, IpAddresses dst_ip
 
     // write attributes to ASIC_DB
     sai_object_id_t tunnel_id;
-    sai_status_t status = sai_tunnel_api->create_tunnel(&tunnel_id, tunnel_attrs.size(), tunnel_attrs.data());
+    status = sai_tunnel_api->create_tunnel(&tunnel_id, tunnel_attrs.size(), tunnel_attrs.data());
     if (status != SAI_STATUS_SUCCESS)
     {
         SWSS_LOG_ERROR("Failed to create tunnel");
