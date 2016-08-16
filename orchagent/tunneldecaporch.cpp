@@ -5,7 +5,6 @@
 extern sai_tunnel_api_t* sai_tunnel_api;
 
 extern sai_object_id_t gVirtualRouterId;
-extern sai_object_id_t overlayIfId;
 extern sai_object_id_t underlayIfId;
 
 TunnelDecapOrch::TunnelDecapOrch(DBConnector *db, string tableName) : Orch(db, tableName)
@@ -171,6 +170,24 @@ bool TunnelDecapOrch::addDecapTunnel(string key, string type, IpAddresses dst_ip
     attr.id = SAI_TUNNEL_ATTR_TYPE;
     attr.value.s32 = SAI_TUNNEL_IPINIP;
     tunnel_attrs.push_back(attr);
+
+
+    // create the overlay router interface to create a LOOPBACK type router interface (decap)
+    sai_attribute_t overlay_intf_attrs[2];
+    overlay_intf_attrs[0].id = SAI_ROUTER_INTERFACE_ATTR_VIRTUAL_ROUTER_ID;
+    overlay_intf_attrs[0].value.oid = gVirtualRouterId;
+    overlay_intf_attrs[1].id = SAI_ROUTER_INTERFACE_ATTR_TYPE;
+    overlay_intf_attrs[1].value.s32 = SAI_ROUTER_INTERFACE_TYPE_LOOPBACK;
+
+    status = sai_router_intfs_api->create_router_interface(&overlayIfId, 2, overlay_intf_attrs);
+    if (status != SAI_STATUS_SUCCESS)
+    {
+        SWSS_LOG_ERROR("Failed to create overlay router interface %d", status);
+        return false;
+    }
+
+    SWSS_LOG_NOTICE("Created overlay router interface ID %llx\n", overlayIfId);
+
     attr.id = SAI_TUNNEL_ATTR_OVERLAY_INTERFACE;
     attr.value.oid = overlayIfId;
     tunnel_attrs.push_back(attr);
