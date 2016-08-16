@@ -3,6 +3,7 @@
 #include "logger.h"
 
 extern sai_tunnel_api_t* sai_tunnel_api;
+extern sai_router_interface_api_t* sai_router_intfs_api;
 
 extern sai_object_id_t gVirtualRouterId;
 extern sai_object_id_t underlayIfId;
@@ -167,12 +168,7 @@ bool TunnelDecapOrch::addDecapTunnel(string key, string type, IpAddresses dst_ip
     // adding tunnel attributes to array and writing to ASIC_DB
     sai_attribute_t attr;
     vector<sai_attribute_t> tunnel_attrs;
-
-    // tunnel type (only ipinip for now)
-    attr.id = SAI_TUNNEL_ATTR_TYPE;
-    attr.value.s32 = SAI_TUNNEL_IPINIP;
-    tunnel_attrs.push_back(attr);
-
+    sai_object_id_t overlayIfId;
 
     // create the overlay router interface to create a LOOPBACK type router interface (decap)
     sai_attribute_t overlay_intf_attrs[2];
@@ -190,6 +186,10 @@ bool TunnelDecapOrch::addDecapTunnel(string key, string type, IpAddresses dst_ip
 
     SWSS_LOG_NOTICE("Created overlay router interface ID %llx\n", overlayIfId);
 
+    // tunnel type (only ipinip for now)
+    attr.id = SAI_TUNNEL_ATTR_TYPE;
+    attr.value.s32 = SAI_TUNNEL_IPINIP;
+    tunnel_attrs.push_back(attr);
     attr.id = SAI_TUNNEL_ATTR_OVERLAY_INTERFACE;
     attr.value.oid = overlayIfId;
     tunnel_attrs.push_back(attr);
